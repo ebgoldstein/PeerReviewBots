@@ -16,10 +16,10 @@ P=33
 #Fraction of scintists who sign their reviews
 Sf=0.5
 #max time step
-Tmax=200
+Tmax=1000
 
 #scientists feeling toward each other
-Nf=zeros(N,N,Tmax+1)
+Nf=zeros(N,N,Tmax)
 
 #vector of scientists behavior: signed (1) and blind reviews (0)
 Si=shuffle([ones(round(Int,N*Sf));zeros(N-round(Int,N*Sf))])
@@ -61,9 +61,33 @@ for t=1:Tmax
       Nf[:,:,t+1]=Nf[:,:,t]
   end
 end
-imshow(Nf[:,:,Tmax])
+#imshow(Nf[:,:,Tmax])
+
 #plot feelings re: signed reviewers
-#Nf[:,findn(Si)]
+SignedReviewers=Nf[:,findn(Si),:];
+Sfeelings=squeeze(sum(SignedReviewers,1),1);
+figure(1)
+hold
+title("Signed")
+for k=1:50
+    plot(Sfeelings[k,:])
+end
+
 #plot feelings re: blind reviewers
-#Nf[:,find(iszero,Si)]
-#plot aggregate peoples feelings aobut the dsicpline (summed)
+BlindReviewers=Nf[:,find(iszero,Si),:];
+Bfeelings=squeeze(sum(BlindReviewers,1),1);
+figure(2)
+hold
+title("Blind")
+for k=1:49
+    plot(Bfeelings[k,:])
+end
+
+#plot aggregate peoples feelings aobut the discpline (summed)
+Discfeeelings=squeeze(sum(Nf,2),2)
+figure(3)
+hold
+title("Discipline")
+for k=1:N
+    plot(Discfeeelings[k,:])
+end
