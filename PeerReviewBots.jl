@@ -63,7 +63,7 @@ for t=1:Tmax
 end
 #imshow(Nf[:,:,Tmax])
 
-#plot feelings re: signed reviewers
+#plot feelings others have re: signed reviewers
 SignedReviewers=Nf[:,findn(Si),:];
 Sfeelings=squeeze(sum(SignedReviewers,1),1);
 figure(1)
@@ -73,7 +73,7 @@ for k=1:50
     plot(Sfeelings[k,:])
 end
 
-#plot feelings re: blind reviewers
+#plot feelings others have re: blind reviewers
 BlindReviewers=Nf[:,find(iszero,Si),:];
 Bfeelings=squeeze(sum(BlindReviewers,1),1);
 figure(2)
@@ -83,7 +83,7 @@ for k=1:49
     plot(Bfeelings[k,:])
 end
 
-#plot aggregate peoples feelings aobut the discpline (summed)
+#plot aggregate peoples feelings about the discpline (summed)
 Discfeeelings=squeeze(sum(Nf,2),2)
 figure(3)
 hold
@@ -91,3 +91,7 @@ title("Discipline")
 for k=1:N
     plot(Discfeeelings[k,:])
 end
+
+#histogram of final feelings for all
+FF=Discfeeelings[:,1000]
+h = PyPlot.plt[:hist](FF,10)
