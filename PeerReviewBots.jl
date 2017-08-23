@@ -18,6 +18,12 @@ Sf=0.5
 #max time step
 Tmax=1000
 
+#Rtype =0 for random reviews between -1 and 1
+#Rtype=1 for 50-50 split of reviews either +1 -1
+#Rtype=2 for random split of reviews either +1 -1
+Rtype=1
+
+
 #scientists feeling toward each other
 Nf=zeros(N,N,Tmax)
 
@@ -28,7 +34,14 @@ for t=1:Tmax
   RandP=randperm(N)
   W=RandP[1:P]
   R=RandP[P+1:N]
-  Reviews=shuffle([ones(P);-ones(P)])
+  if Rtype==0
+      Reviews=2rand((2*P))-1
+  elseif Rtype==1
+      Reviews=shuffle([ones(P);-ones(P)])
+  elseif Rtype==2
+      Reviews=rand(-1:1,(2*P))
+  end
+
   RW=1:2:66
   for PW=1:33
     RW[PW]
@@ -93,5 +106,6 @@ for k=1:N
 end
 
 #histogram of final feelings for all
+figure(4)
 FF=Discfeeelings[:,1000]
 h = PyPlot.plt[:hist](FF,10)
