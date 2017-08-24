@@ -24,7 +24,9 @@ Tmax=1000
 Rtype=1
 
 
-#scientists feeling toward each other
+#scientists feeling toward each other.
+# Row of Nf is the feelings of scientist (R) toward other scientists.
+# Column index (C) of Nf is the feeling of Scientist (R) toward another (with index of C)
 Nf=zeros(N,N,Tmax)
 
 #vector of scientists behavior: signed (1) and blind reviews (0)
@@ -74,33 +76,45 @@ for t=1:Tmax
       Nf[:,:,t+1]=Nf[:,:,t]
   end
 end
+
 #imshow(Nf[:,:,Tmax])
 
-#plot feelings others have re: signed reviewers
+#plot feelings others have toward the signed reviewers
+#first find all feelings others have toward the signed reviewers (columns)
 SignedReviewers=Nf[:,findn(Si),:];
+#Sum down the columns and then squeeze the other dimension
 Sfeelings=squeeze(sum(SignedReviewers,1),1);
 figure(1)
 hold
 title("Signed")
+xlabel("Time")
+ylabel("Feelings")
 for k=1:50
     plot(Sfeelings[k,:])
 end
 
-#plot feelings others have re: blind reviewers
+#plot feelings others have toward the blind reviewers
+#first find all feelings others have toward the blind reviewers (columns)
 BlindReviewers=Nf[:,find(iszero,Si),:];
+#Sum down the columns and then squeeze the other dimension
 Bfeelings=squeeze(sum(BlindReviewers,1),1);
 figure(2)
 hold
 title("Blind")
+xlabel("Time")
+ylabel("Feelings")
 for k=1:49
     plot(Bfeelings[k,:])
 end
 
-#plot aggregate peoples feelings about the discpline (summed)
+#plot aggregate peoples feelings about the discpline (summed over all reviewers)
+#Sum the rows
 Discfeeelings=squeeze(sum(Nf,2),2)
 figure(3)
 hold
 title("Discipline")
+xlabel("Time")
+ylabel("Feelings")
 for k=1:N
     plot(Discfeeelings[k,:])
 end
@@ -109,3 +123,4 @@ end
 figure(4)
 FF=Discfeeelings[:,1000]
 h = PyPlot.plt[:hist](FF,10)
+xlabel("Feelings")
