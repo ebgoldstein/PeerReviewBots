@@ -13,12 +13,12 @@ N=99
 
 #number of paper writers per time step
 P=33
-#Fraction of scintists who sign their reviews
+#Fraction of scientists who sign their reviews
 Sf=0.5
 #max time step
-Tmax=1000
+Tmax=10000
 
-#Rtype =0 for random reviews between -1 and 1
+#Rtype=0 for random reviews between -1 and 1
 #Rtype=1 for 50-50 split of reviews either +1 -1
 #Rtype=2 for random split of reviews either +1 -1
 Rtype=1
@@ -83,33 +83,35 @@ end
 #first find all feelings others have toward the signed reviewers (columns)
 SignedReviewers=Nf[:,findn(Si),:];
 #Sum down the columns and then squeeze the other dimension
-Sfeelings=squeeze(sum(SignedReviewers,1),1);
+Sfeelings=squeeze(mean(SignedReviewers,1),1);
 figure(1)
+subplot(2,1,1)
 hold
 title("Signed")
-xlabel("Time")
+#xlabel("Time")
 ylabel("Feelings")
 for k=1:50
     plot(Sfeelings[k,:])
 end
-
+ylim([-3,3])
 #plot feelings others have toward the blind reviewers
 #first find all feelings others have toward the blind reviewers (columns)
 BlindReviewers=Nf[:,find(iszero,Si),:];
 #Sum down the columns and then squeeze the other dimension
-Bfeelings=squeeze(sum(BlindReviewers,1),1);
-figure(2)
+Bfeelings=squeeze(mean(BlindReviewers,1),1);
+subplot(2,1,2)
 hold
-title("Blind")
+title("Unsigned")
 xlabel("Time")
 ylabel("Feelings")
 for k=1:49
     plot(Bfeelings[k,:])
 end
+ylim([-3,3])
 
 #plot aggregate peoples feelings about the discpline (summed over all reviewers)
 #Sum the rows
-Discfeeelings=squeeze(sum(Nf,2),2)
+Discfeeelings=squeeze(mean(Nf,2),2)
 figure(3)
 hold
 title("Discipline")
