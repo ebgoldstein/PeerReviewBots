@@ -16,13 +16,15 @@ P=33
 #Fraction of scientists who sign their reviews
 Sf=0.5
 #max time step
-Tmax=10000
+Tmax=50000
 
 #Rtype=0 for random reviews between -1 and 1
 #Rtype=1 for 50-50 split of reviews either +1 -1
 #Rtype=2 for random split of reviews either +1 -1
 Rtype=1
 
+#Retaliatory Fraction
+Re=0.3
 
 #scientists feeling toward each other.
 # Row of Nf is the feelings of scientist (R) toward other scientists.
@@ -31,6 +33,11 @@ Nf=zeros(N,N,Tmax)
 
 #vector of scientists behavior: signed (1) and blind reviews (0)
 Si=shuffle([ones(round(Int,N*Sf));zeros(N-round(Int,N*Sf))])
+
+#vector of scientists behavior : retaliate (1) and not-retaliate (0)
+Retal=shuffle([ones(round(Int,N*Re));zeros(N-round(Int,N*Re))])
+
+Posreviewsperstep=zeros(10000)
 
 for t=1:Tmax
   RandP=randperm(N)
@@ -50,9 +57,17 @@ for t=1:Tmax
     #assign the reviewers
     IndexRev1=R[RW[PW]]
     IndexRev2=R[RW[PW]+1]
-    #assign the review score
-    ReviewRev1=Reviews[RW[PW]]
-    ReviewRev2=Reviews[RW[PW]+1]
+    #assign the review score based on if retaliation occurs
+    if Retal[IndexRev1] == 1  &  round(Int,Nf[IndexRev1,W[PW],t]) != 0 #retaliate
+        ReviewRev1=sign(Nf[IndexRev1,W[PW],t])
+    else    #don't retaliate
+        ReviewRev1=Reviews[RW[PW]]
+    end
+    if Retal[IndexRev2] == 1  &  round(Int,Nf[IndexRev2,W[PW],t]) != 0 #retaliate
+        ReviewRev2=sign(Nf[IndexRev2,W[PW],t])
+    else    #don't retaliate
+        ReviewRev2=Reviews[RW[PW]+1]
+    end
     #determine if signed or unsigned
     SRev1=Si[IndexRev1]
     SRev2=Si[IndexRev2]
@@ -71,20 +86,30 @@ for t=1:Tmax
         Nf[W[PW],RandomRev,t] += ReviewRev2
     end
 
+    # #track the positive reviews for each time step
+    # if ReviewRev1 == 1
+    #     Posreviewsperstep[t] += 1
+    # end
+    # if ReviewRev2 == 1
+    #     Posreviewsperstep[t] += 1
+    # end
+
   end
   if t<Tmax
       Nf[:,:,t+1]=Nf[:,:,t]
   end
 end
 
-#imshow(Nf[:,:,Tmax])
+figure(1)
+imshow(Nf[:,:,Tmax])
+colorbar()
 
 #plot feelings others have toward the signed reviewers
 #first find all feelings others have toward the signed reviewers (columns)
 SignedReviewers=Nf[:,findn(Si),:];
 #Sum down the columns and then squeeze the other dimension
 Sfeelings=squeeze(mean(SignedReviewers,1),1);
-figure(1)
+figure(2)
 subplot(2,1,1)
 hold
 title("Signed")
@@ -109,20 +134,20 @@ for k=1:49
 end
 ylim([-3,3])
 
-#plot aggregate peoples feelings about the discpline (summed over all reviewers)
-#Sum the rows
-Discfeeelings=squeeze(mean(Nf,2),2)
-figure(3)
-hold
-title("Discipline")
-xlabel("Time")
-ylabel("Feelings")
-for k=1:N
-    plot(Discfeeelings[k,:])
-end
+# #plot aggregate peoples feelings about the discpline (summed over all reviewers)
+# #Sum the rows
+# Discfeeelings=squeeze(mean(Nf,2),2)
+# figure(3)
+# hold
+# title("Discipline")
+# xlabel("Time")
+# ylabel("Feelings")
+# for k=1:N
+#     plot(Discfeeelings[k,:])
+# end
 
-#histogram of final feelings for all
-figure(4)
-FF=Discfeeelings[:,1000]
-h = PyPlot.plt[:hist](FF,10)
-xlabel("Feelings")
+# #histogram of final feelings for all
+# figure(4)
+# FF=Discfeeelings[:,1000]
+# h = PyPlot.plt[:hist](FF,10)
+# xlabel("Feelings")
