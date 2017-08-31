@@ -36,6 +36,9 @@ Si=shuffle([ones(round(Int,N*Sf));zeros(N-round(Int,N*Sf))])
 #vector of scientists behavior : retaliate (1) and not-retaliate (0)
 Retal=shuffle([ones(round(Int,N*Re));zeros(N-round(Int,N*Re))])
 
+#Make a new vector; signed (1), signed+retal (2),unsigned (3) unsigned+retal (4)
+
+
 Posreviewsperstep=zeros(10000)
 
 for t=1:Tmax
