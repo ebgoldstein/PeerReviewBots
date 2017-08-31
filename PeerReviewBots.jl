@@ -5,7 +5,6 @@ about the peer review system using an agent based model (bots)
 Started by EBG in 08/2017; MIT license
 =#
 ###############################################################
-
 using PyPlot
 
 # number of scientist
@@ -24,12 +23,12 @@ Tmax=50000
 Rtype=1
 
 #Retaliatory Fraction
-Re=0.3
+Re=0.2
 
-#scientists feeling toward each other.
-# Row of Nf is the feelings of scientist (R) toward other scientists.
-# Column index (C) of Nf is the feeling of Scientist (R) toward another (with index of C)
-Nf=zeros(N,N,Tmax)
+#scientists feeling toward each other. Adjacency matrix
+# Row of A is the feelings of scientist (R) toward other scientists.
+# Column index (C) of A is the feeling of Scientist (R) toward another (with index of C)
+A=zeros(N,N,Tmax)
 
 #vector of scientists behavior: signed (1) and blind reviews (0)
 Si=shuffle([ones(round(Int,N*Sf));zeros(N-round(Int,N*Sf))])
@@ -58,13 +57,13 @@ for t=1:Tmax
     IndexRev1=R[RW[PW]]
     IndexRev2=R[RW[PW]+1]
     #assign the review score based on if retaliation occurs
-    if Retal[IndexRev1] == 1  &  round(Int,Nf[IndexRev1,W[PW],t]) != 0 #retaliate
-        ReviewRev1=sign(Nf[IndexRev1,W[PW],t])
+    if Retal[IndexRev1] == 1  &  round(Int,A[IndexRev1,W[PW],t]) != 0 #retaliate
+        ReviewRev1=sign(A[IndexRev1,W[PW],t])
     else    #don't retaliate
         ReviewRev1=Reviews[RW[PW]]
     end
-    if Retal[IndexRev2] == 1  &  round(Int,Nf[IndexRev2,W[PW],t]) != 0 #retaliate
-        ReviewRev2=sign(Nf[IndexRev2,W[PW],t])
+    if Retal[IndexRev2] == 1  &  round(Int,A[IndexRev2,W[PW],t]) != 0 #retaliate
+        ReviewRev2=sign(A[IndexRev2,W[PW],t])
     else    #don't retaliate
         ReviewRev2=Reviews[RW[PW]+1]
     end
@@ -73,17 +72,17 @@ for t=1:Tmax
     SRev2=Si[IndexRev2]
     #assign the blame/credit
     if SRev1==1 # signed R1
-        Nf[W[PW],IndexRev1,t] += ReviewRev1
+        A[W[PW],IndexRev1,t] += ReviewRev1
     else # blind R1
         RandomRev=R[rand(1:66)]
-        Nf[W[PW],RandomRev,t] += ReviewRev1
+        A[W[PW],RandomRev,t] += ReviewRev1
     end
     if SRev2==1 # signed R2
-        Nf[W[PW],IndexRev2,t] += ReviewRev2
+        A[W[PW],IndexRev2,t] += ReviewRev2
 
     else # blind R1
         RandomRev=R[rand(1:66)]
-        Nf[W[PW],RandomRev,t] += ReviewRev2
+        A[W[PW],RandomRev,t] += ReviewRev2
     end
 
     # #track the positive reviews for each time step
@@ -96,58 +95,41 @@ for t=1:Tmax
 
   end
   if t<Tmax
-      Nf[:,:,t+1]=Nf[:,:,t]
+      A[:,:,t+1]=A[:,:,t]
   end
 end
 
-figure(1)
-imshow(Nf[:,:,Tmax])
-colorbar()
 
-#plot feelings others have toward the signed reviewers
-#first find all feelings others have toward the signed reviewers (columns)
-SignedReviewers=Nf[:,findn(Si),:];
-#Sum down the columns and then squeeze the other dimension
-Sfeelings=squeeze(mean(SignedReviewers,1),1);
-figure(2)
-subplot(2,1,1)
-hold
-title("Signed")
-#xlabel("Time")
-ylabel("Feelings")
-for k=1:50
-    plot(Sfeelings[k,:])
-end
-ylim([-3,3])
-#plot feelings others have toward the blind reviewers
-#first find all feelings others have toward the blind reviewers (columns)
-BlindReviewers=Nf[:,find(iszero,Si),:];
-#Sum down the columns and then squeeze the other dimension
-Bfeelings=squeeze(mean(BlindReviewers,1),1);
-subplot(2,1,2)
-hold
-title("Unsigned")
-xlabel("Time")
-ylabel("Feelings")
-for k=1:49
-    plot(Bfeelings[k,:])
-end
-ylim([-3,3])
-
-# #plot aggregate peoples feelings about the discpline (summed over all reviewers)
-# #Sum the rows
-# Discfeeelings=squeeze(mean(Nf,2),2)
-# figure(3)
-# hold
-# title("Discipline")
-# xlabel("Time")
-# ylabel("Feelings")
-# for k=1:N
-#     plot(Discfeeelings[k,:])
-# end
+#figure(1)
+#imshow(A[:,:,Tmax])
+#colorbar()
 
 # #histogram of final feelings for all
 # figure(4)
 # FF=Discfeeelings[:,1000]
 # h = PyPlot.plt[:hist](FF,10)
 # xlabel("Feelings")
+
+#Calculate feelings others have toward the signed reviewers (input strength)
+#first find all feelings others have toward the signed reviewers (columns)
+SignedReviewerscol=A[:,findn(Si),:];
+SignedReviewersrow=A[findn(Si),:,:];
+#find ranges
+RinSigned=maximum(SignedReviewerscol[:,:,Tmax],1)-minimum(SignedReviewerscol[:,:,Tmax],1);
+RoutSigned=(maximum(SignedReviewersrow[:,:,Tmax],2)-minimum(SignedReviewersrow[:,:,Tmax],2))';
+
+#Calculate feelings others have toward the blind reviewers (input strength)
+#first find all feelings others have toward the blind reviewers (columns)
+UnsignedReviewerscol=A[:,find(iszero,Si),:];
+UnsignedReviewersrow=A[find(iszero,Si),:,:];
+#find ranges
+RinUnsigned=maximum(UnsignedReviewerscol[:,:,Tmax],1)-minimum(UnsignedReviewerscol[:,:,Tmax],1);
+RoutUnsigned=(maximum(UnsignedReviewersrow[:,:,Tmax],2)-minimum(UnsignedReviewersrow[:,:,Tmax],2))';
+
+figure()
+plot(RinSigned',RoutSigned',"o")
+hold
+plot(RinUnsigned',RoutUnsigned',"o")
+legend( ["Signed","Unsigned"])
+xlabel("Rin")
+ylabel("Rout")
