@@ -1,12 +1,6 @@
 ## PeerReviewBots — an agent based model of Peer Review
 
-This model is outlined in a series of blog posts:
-
-the motivation for the model was a series of papers from 2003:
-https://ebgoldstein.wordpress.com/2017/08/15/the-agu-eos-anonymous-peer-review-debate-of-2003-2004/
-
-And the rules for the model were outlined here:
-https://ebgoldstein.wordpress.com/2017/08/22/rules-for-a-agent-based-peer-review-model/
+The motivation and ruleset for the model is descirbed in more detail on: https://ebgoldstein.wordpress.com/geobibliometrics/peer-review-model/
 
 For reference, the general rules are:
 Each agent (scientist) is set to either sign or blind their reviews.
