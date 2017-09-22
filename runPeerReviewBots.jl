@@ -9,15 +9,16 @@ Tmax=1000 #is max time step; 10000
 Re=0.3 #is Retaliatory Fraction; 0.3
 Rtype=1 #for 50-50 split of reviews either +1 -1
 
-
+#run the model with the values above
 (A,RCategories)=PeerReviewBots(N,P,Sf,Tmax,Re,Rtype)
 
 #The key for RCategories:
+#   unsigned (0)
 #   signed (1),
 #   signed+retal (2),
-#   unsigned (0)
 #   unsigned+retal (3)
 
+#find the range of weights for each category
 Runsigned=WeightR(A,RCategories,Tmax,0)
 Rsigned=WeightR(A,RCategories,Tmax,1)
 RsignedRetal=WeightR(A,RCategories,Tmax,2)
